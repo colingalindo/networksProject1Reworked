@@ -1,0 +1,7 @@
+G:\Visual Studios 2010\networksProject1\networksProject1\bin\Debug\networksProject1.exe
+G:\Visual Studios 2010\networksProject1\networksProject1\bin\Debug\networksProject1.pdb
+G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.Form1.resources
+G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.Properties.Resources.resources
+G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.csproj.GenerateResource.Cache
+G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.exe
+G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.pdb
