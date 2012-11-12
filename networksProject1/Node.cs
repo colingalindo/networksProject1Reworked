@@ -77,6 +77,61 @@ namespace networksProject1
             queue.Enqueue(tmpEvent);
         }
 
+        internal void addEvent(ref PriorityQueue queue, int eT, int p, double t, int d)
+        {
+            Event tmpEvent = new Event(t, eT, address, p, d);
+            queue.Enqueue(tmpEvent);
+        }
+
+        public void processEvent(ref PriorityQueue queue)
+        {
+            Event tmpEvent = (Event)queue.Dequeue();
+            if ((tmpEvent.eventType == 1) || (tmpEvent.eventType == 2))
+            {
+                bool changed = false;
+                int newCost = 0;
+                RT tmpRT = new RT();
+                foreach (KeyValuePair<int, DV> tmpDV in tmpEvent.packet.getDV())
+                {
+                    newCost = tmpDV.Value.cost + neighborTable[tmpEvent.sourceIP].cost;
+                    tmpRT.destination = tmpDV.Value.destination;
+                    tmpRT.cost = newCost;
+                    tmpRT.nextHop = tmpEvent.sourceIP;
+                    if (!routingTable.ContainsKey(tmpDV.Value.destination))
+                    {
+                        routingTable.Add(tmpDV.Value.destination, tmpRT);
+                        changed = true;
+                    }
+                    else
+                    {
+                        if(routingTable[tmpDV.Value.destination].cost > newCost)
+                        {
+                            routingTable.Remove(tmpDV.Value.destination);
+                            routingTable.Add(tmpDV.Value.destination, tmpRT);
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed)
+                {
+                    foreach (KeyValuePair<int, NT> tmpNT in neighborTable)
+                    {
+                        addEvent(ref queue, 2, tmpNT.Value.destination, tmpEvent.time + tmpNT.Value.delay);
+                    }
+                }
+            }
+            if (tmpEvent.eventType == 3)
+            {
+
+            }
+            if (tmpEvent.eventType == 4)
+            {
+                foreach (KeyValuePair<int, DV> tmpDV in tmpEvent.packet.getDV())
+                {
+                }
+            }
+        }
+
         private DVPacket prepareDVPacket(int d)
         {
             DVPacket packet = new DVPacket();

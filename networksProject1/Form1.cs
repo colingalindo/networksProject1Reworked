@@ -14,6 +14,10 @@ namespace networksProject1
 {
     public partial class Form1 : Form
     {
+        IComparer myComparer;
+        PriorityQueue queue;
+        bool tablesInit;
+
         public struct link
         {
             public link(int s, int d, int c, double de) { source = s; destination = d; cost = c; delay = de; }
@@ -43,36 +47,51 @@ namespace networksProject1
         {
             InitializeComponent();
             nodes = new Dictionary<int, Node>();
+            myComparer = new myCompareClass();
+            queue = new PriorityQueue(myComparer);
+            tablesInit = false;
         }
 
         private void runSim_Click(object sender, EventArgs e)
         {
-            if (initializeTables())
-            {
-                IComparer myComparer = new myCompareClass();
-                PriorityQueue queue = new PriorityQueue(myComparer);
+            if (!tablesInit)
+                initializeTables();
+            //if (initializeTables())
+            //{
                 Dictionary<int, NT> tmpNT = new Dictionary<int, NT>();
-                for (int i = 0; i < nodes.Count; ++i)
+                int lastNodeToConverge = -1;
+                int numUpdates = 0;
+                double convergeTime = -1;
+                int periodicUpdateTime = 0;
+                bool converged = false;
+                while (!converged)
                 {
-                    tmpNT = nodes[i].getNeighborTable();
-                    foreach (KeyValuePair<int, NT> tmp in tmpNT)
+                    for (int i = 0; i < nodes.Count; ++i)
                     {
-                        nodes[i].addEvent(ref queue, 1, tmp.Value.destination, tmp.Value.delay);
+                        tmpNT = nodes[i].getNeighborTable();
+                        foreach (KeyValuePair<int, NT> tmp in tmpNT)
+                        {
+                            nodes[i].addEvent(ref queue, 1, tmp.Value.destination, tmp.Value.delay);
+                        }
                     }
-                }
-                foreach (Event tmpEvent in queue)
-                {
-                    Console.WriteLine("Time: " + tmpEvent.time);
-                    Console.WriteLine("Source: " + tmpEvent.sourceIP);
-                    Console.WriteLine("Destination: " + tmpEvent.destinationIP);
-                    Console.WriteLine("Type: " + tmpEvent.eventType);
-                    foreach (KeyValuePair<int, DV> tmp in tmpEvent.packet.getDV())
+                    periodicUpdateTime++;
+                    while (queue.Count > 0)
                     {
-                        Console.WriteLine("\tDestination: " + tmp.Value.destination + "\tCost: " + tmp.Value.cost);
+                        Event tmpEvent = (Event)queue.Peek();
+                        if ((tmpEvent.eventType == 1) || (tmpEvent.eventType == 2))
+                            numUpdates++;
+                        if (tmpEvent.eventType == 2)
+                            lastNodeToConverge = tmpEvent.sourceIP;
+                        convergeTime = tmpEvent.time;
+                        nodes[tmpEvent.destinationIP].processEvent(ref queue);
                     }
+                    converged = networkConverged(queue);
                 }
-                //printTables();
-            }
+                printTables();
+                Console.WriteLine("Time to converge: " + convergeTime);
+                Console.WriteLine("Last node to converge: " + lastNodeToConverge);
+                Console.WriteLine("Number of Periodic and Triggered updates: " + numUpdates);
+            //}
         }
 
         private bool initializeTables()
@@ -114,7 +133,7 @@ namespace networksProject1
                 nodes[tmpLink.destination].addRoute(tmpLink.source, tmpLink.cost, tmpLink.source);
                 nodes[tmpLink.destination].addNeighbor(tmpLink.source, tmpLink.cost, tmpLink.delay);
             }
-                
+            tablesInit = true;
             return true;
         }
 
@@ -130,6 +149,64 @@ namespace networksProject1
                     Console.WriteLine("\tDestination: " + tmp.Value.destination + "\tCost: " + tmp.Value.cost + "\tNext Hop: " + tmp.Value.nextHop);
                 }
             }
+        }
+
+        private void debug(Event tmpEvent)
+        {
+            Console.WriteLine("Time: " + tmpEvent.time);
+            Console.WriteLine("Source: " + tmpEvent.sourceIP);
+            Console.WriteLine("Destination: " + tmpEvent.destinationIP);
+            Console.WriteLine("Type: " + tmpEvent.eventType);
+            foreach (KeyValuePair<int, DV> tmp in tmpEvent.packet.getDV())
+            {
+                Console.WriteLine("\tDestination: " + tmp.Value.destination + "\tCost: " + tmp.Value.cost);
+            }
+        }
+
+        private bool networkConverged(PriorityQueue queue)
+        {
+            Event tmpEvent;
+            while (queue.Count > 0)
+            {
+                tmpEvent = (Event)queue.Dequeue();
+                if ((tmpEvent.eventType == 2) || (tmpEvent.eventType == 3) || (tmpEvent.eventType == 4))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void closeButton_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void addEventButton_Click(object sender, EventArgs e)
+        {
+            if ((eventTypeBox.Text == "") || (timeBox.Text == "") || (sNodeBox.Text == "") || (dNodeBox.Text == ""))
+            {
+                return;
+            }
+
+            int source = Convert.ToInt32(sNodeBox.Text);
+            int destination = Convert.ToInt32(sNodeBox.Text);
+            int eventType = Convert.ToInt32(eventTypeBox.Text);
+            double time = Convert.ToDouble(timeBox.Text);
+
+            initializeTables();
+
+            if (eventType == 3)
+            {
+                nodes[source].addEvent(ref queue, eventType, destination, time);
+                nodes[destination].addEvent(ref queue, eventType, source, time);
+            }
+            if (eventType == 4)
+            {
+                nodes[source].addEvent(ref queue, eventType, -1, time, destination);
+            }
+
+            Console.WriteLine("Event Added");
         }
     }
 }
