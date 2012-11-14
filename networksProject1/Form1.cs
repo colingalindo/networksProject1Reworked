@@ -190,7 +190,7 @@ namespace networksProject1
             }
 
             int source = Convert.ToInt32(sNodeBox.Text);
-            int destination = Convert.ToInt32(sNodeBox.Text);
+            int destination = Convert.ToInt32(dNodeBox.Text);
             int eventType = Convert.ToInt32(eventTypeBox.Text);
             double time = Convert.ToDouble(timeBox.Text);
 
@@ -203,7 +203,7 @@ namespace networksProject1
             }
             if (eventType == 4)
             {
-                nodes[source].addEvent(ref queue, eventType, -1, time, destination);
+                nodes[source].addEvent(ref queue, eventType, source, time, destination);
             }
 
             Console.WriteLine("Event Added");

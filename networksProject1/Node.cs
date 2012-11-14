@@ -86,48 +86,81 @@ namespace networksProject1
         public void processEvent(ref PriorityQueue queue)
         {
             Event tmpEvent = (Event)queue.Dequeue();
+            bool changed = false;
             if ((tmpEvent.eventType == 1) || (tmpEvent.eventType == 2))
             {
-                bool changed = false;
                 int newCost = 0;
                 RT tmpRT = new RT();
                 foreach (KeyValuePair<int, DV> tmpDV in tmpEvent.packet.getDV())
                 {
-                    newCost = tmpDV.Value.cost + neighborTable[tmpEvent.sourceIP].cost;
-                    tmpRT.destination = tmpDV.Value.destination;
-                    tmpRT.cost = newCost;
-                    tmpRT.nextHop = tmpEvent.sourceIP;
-                    if (!routingTable.ContainsKey(tmpDV.Value.destination))
+                    if (tmpDV.Value.cost == -1)
                     {
-                        routingTable.Add(tmpDV.Value.destination, tmpRT);
-                        changed = true;
-                    }
-                    else
-                    {
-                        if(routingTable[tmpDV.Value.destination].cost > newCost)
+                        routingTable.Remove(tmpDV.Value.destination);
+                        if(neighborTable.ContainsKey(tmpDV.Value.destination))
                         {
-                            routingTable.Remove(tmpDV.Value.destination);
+                            tmpRT.destination = tmpDV.Value.destination;
+                            tmpRT.cost = neighborTable[tmpDV.Value.destination].cost;
+                            tmpRT.nextHop = tmpDV.Value.destination;
                             routingTable.Add(tmpDV.Value.destination, tmpRT);
                             changed = true;
                         }
                     }
-                }
-                if (changed)
-                {
-                    foreach (KeyValuePair<int, NT> tmpNT in neighborTable)
+                    else
                     {
-                        addEvent(ref queue, 2, tmpNT.Value.destination, tmpEvent.time + tmpNT.Value.delay);
+                        newCost = tmpDV.Value.cost + neighborTable[tmpEvent.sourceIP].cost;
+                        tmpRT.destination = tmpDV.Value.destination;
+                        tmpRT.cost = newCost;
+                        tmpRT.nextHop = tmpEvent.sourceIP;
+                        if (!routingTable.ContainsKey(tmpDV.Value.destination))
+                        {
+                            routingTable.Add(tmpDV.Value.destination, tmpRT);
+                            changed = true;
+                        }
+                        else
+                        {
+                            if ((routingTable[tmpDV.Value.destination].cost > newCost)||(routingTable[tmpDV.Value.destination].cost == -1))
+                            {
+                                routingTable.Remove(tmpDV.Value.destination);
+                                routingTable.Add(tmpDV.Value.destination, tmpRT);
+                                changed = true;
+                            }
+                        }
                     }
                 }
             }
             if (tmpEvent.eventType == 3)
             {
-
+                RT tmpRT = new RT( tmpEvent.sourceIP, -1, routingTable[tmpEvent.sourceIP].nextHop);
+                routingTable.Remove(tmpEvent.sourceIP);
+                routingTable.Add(tmpEvent.sourceIP, tmpRT);
+                changed = true;
             }
             if (tmpEvent.eventType == 4)
             {
-                foreach (KeyValuePair<int, DV> tmpDV in tmpEvent.packet.getDV())
+                if (address == tmpEvent.dataPacketDestination)
                 {
+                    Console.WriteLine("Packet received from " + tmpEvent.sourceIP + " at " + tmpEvent.time);
+                }
+                else
+                {
+                    foreach (KeyValuePair<int, RT> tmpRT in routingTable)
+                    {
+                        //Console.WriteLine("Event type 4");
+                        //Console.WriteLine("RT destination: " + tmpRT.Value.destination);
+                        //Console.WriteLine("Data Packet dest: " + tmpEvent.dataPacketDestination);
+                        if (tmpRT.Value.destination == tmpEvent.dataPacketDestination)
+                        {
+                            addEvent(ref queue, 4, tmpRT.Value.nextHop, tmpEvent.time + neighborTable[tmpRT.Value.nextHop].delay, tmpEvent.dataPacketDestination);
+                            Console.WriteLine("Sending data packet to " + tmpRT.Value.nextHop + " from " + address + " at time " + tmpEvent.time);
+                        }
+                    }
+                }
+            }
+            if (changed)
+            {
+                foreach (KeyValuePair<int, NT> tmpNT in neighborTable)
+                {
+                    addEvent(ref queue, 2, tmpNT.Value.destination, tmpEvent.time + tmpNT.Value.delay);
                 }
             }
         }

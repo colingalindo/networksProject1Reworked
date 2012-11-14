@@ -5,3 +5,12 @@ G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksP
 G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.csproj.GenerateResource.Cache
 G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.exe
 G:\Visual Studios 2010\networksProject1\networksProject1\obj\x86\Debug\networksProject1.pdb
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\networksProject1.exe
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\networksProject1.pdb
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\networksProject1.Form1.resources
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\networksProject1.Properties.Resources.resources
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\bin\Debug\networksProject1.exe
+C:\Users\Colin\Desktop\networksProject1Reworked-master\networksProject1\bin\Debug\networksProject1.pdb
